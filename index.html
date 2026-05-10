@@ -1,0 +1,615 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script>
+(function(){
+  var __k="b5933566-e322-407f-818a-47abe17dd659";
+  var __a=null;
+  var __preload=null;
+  if(!__k)return;
+  var _f=window.fetch;
+  // S3 URL → file_key 추출 후 __a 매핑 lookup → assets/ 로컬 경로 치환
+  // 응답에 새 signed URL이 와도 같은 file_key면 같은 assets/ → 영구 작동
+  function patchUrls(data){
+    if(!__a)return data;
+    try{
+      var s=JSON.stringify(data);
+      // 응답 안의 모든 S3 URL을 정규식으로 찾고, file_key 추출 → 매핑 lookup
+      s=s.replace(/https:\/\/prod-files-secure\.s3\.amazonaws\.com\/[^"\s<>]+/g,function(url){
+        var m=url.match(/\.amazonaws\.com\/([^?\\]+)/);
+        if(!m)return url;
+        var key=m[1].replace(/\\u002F/g,"/");
+        return __a[key]||url;
+      });
+      return JSON.parse(s);
+    }catch(e){return data;}
+  }
+  function callMisiso(method,path,body){
+    return _f("https://misiso.com/api/notion/deploy-proxy",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({deployKey:__k,path:path,method:method,body:body})
+    }).then(function(r){
+      var status=r.status;
+      return r.json().then(function(data){return {status:status,data:patchUrls(data)};});
+    });
+  }
+  // preload pattern — 페이지 로드와 병렬로 정적 fetch 호출 미리 시작
+  var __preloadCache={};
+  if(__preload){
+    for(var i=0;i<__preload.length;i++){
+      (function(c){
+        var key=c.method+":"+c.path+":"+(c.body?JSON.stringify(c.body):"");
+        __preloadCache[key]=callMisiso(c.method,c.path,c.body);
+      })(__preload[i]);
+    }
+  }
+  window.fetch=function(url,opts){
+    var u=typeof url==="string"?url:String(url);
+    if(!u.startsWith("/api/notion/"))return _f.apply(this,arguments);
+    var path=u.slice("/api/notion".length);
+    var method=(opts&&opts.method)||"GET";
+    var body;
+    try{body=opts&&opts.body?JSON.parse(opts.body):undefined;}catch(e){body=opts&&opts.body;}
+    var ck=method+":"+path+":"+(body?JSON.stringify(body):"");
+    var promise=__preloadCache[ck];
+    if(promise){delete __preloadCache[ck];}
+    else{promise=callMisiso(method,path,body);}
+    return promise.then(function(res){
+      return new Response(JSON.stringify(res.data),{
+        status:res.status,
+        headers:{"Content-Type":"application/json"}
+      });
+    });
+  };
+})();
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://misiso.com" crossorigin/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="린다이어트 밀착관리용 복사 템플릿"/>
+<meta property="og:description" content="린다이어트 밀착관리용 복사 템플릿"/>
+<title>린다이어트 밀착관리용 복사 템플릿</title>
+<meta name="description" content="린다이어트 밀착관리용 복사 템플릿"/>
+<meta property="og:image" content="https://junesight.github.io/lean-template/og-image-00xwhkxh.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://junesight.github.io/lean-template/og-image-00xwhkxh.png"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2032%2032'%3E%3Crect%20width%3D'32'%20height%3D'32'%20rx%3D'6'%20fill%3D'%236366f1'%2F%3E%3Ctext%20x%3D'16'%20y%3D'22'%20text-anchor%3D'middle'%20font-size%3D'18'%20fill%3D'white'%20font-family%3D'sans-serif'%3E%EB%A6%B0%3C%2Ftext%3E%3C%2Fsvg%3E"/>
+<script src="https://cdn.tailwindcss.com"></script>
+</head><body><!doctype html>
+<html lang="ko">
+<head>
+  
+  
+  
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --border: #e5e7eb;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      width: min(100% - 32px, 1480px);
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px 0 48px;
+    }
+
+    .header {
+      max-width: 760px;
+      margin: 0 auto 20px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      max-width: 640px;
+      font-size: clamp(28px, 3vw, 40px);
+      line-height: 1.25;
+      margin: 0 auto 8px;
+      letter-spacing: -0.03em;
+    }
+
+    .description {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin: 20px 0 14px;
+      justify-content: center;
+    }
+
+    .search {
+      width: 100%;
+      max-width: 640px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+      background: #fff;
+      text-align: center;
+    }
+
+    .search:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .category-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      max-width: 760px;
+      margin: 0 auto 12px;
+    }
+
+    .category-button {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #fff;
+      color: var(--muted);
+      transition: 0.15s ease;
+    }
+
+    .category-button:hover {
+      background: #f3f4f6;
+    }
+
+    .category-button.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    #templateList {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .tag.naver-blog {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .tag.youtube {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .card-title {
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.35;
+      margin: 0 0 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .preview {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #374151;
+      margin: 0 0 14px;
+      flex: 1;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      transition: 0.15s ease;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
+    .secondary {
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    .secondary:hover {
+      background: #e0e7ff;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(16px);
+      background: #111827;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.2s ease;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .empty {
+      display: none;
+      color: var(--muted);
+      text-align: center;
+      padding: 36px 0;
+      font-size: 15px;
+    }
+
+    @media (max-width: 640px) {
+      .category-filters {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 420px;
+      }
+
+      .category-button {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 23px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="header">
+      <h1>린다이어트 밀착관리용 복사 템플릿</h1>
+      <p class="description">
+        자주 쓰는 링크, 안내문 내용을 버튼 한 번으로 복사합니다.
+      </p>
+    </section>
+
+    <section id="categoryFilters" class="category-filters" aria-label="카테고리 선택"></section>
+
+    <section class="toolbar">
+      <input
+        id="searchInput"
+        class="search"
+        type="search"
+        placeholder="템플릿 검색"
+        aria-label="템플릿 검색"
+      />
+    </section>
+
+    <section id="templateList"></section>
+    <div id="emptyState" class="empty">검색 결과가 없습니다.</div>
+  </main>
+
+  <div id="toast" class="toast">복사 완료</div>
+
+  <script>
+    const templates = [
+      {
+        id: "leandiet-standard",
+        category: "안내 링크",
+        title: "부부한의원 린다이어트 스탠다드 프로그램 안내",
+        content: ["부부한의원 린다이어트 스탠다드 프로그램 안내", "https://junesight.github.io/leandiet-standard/"].join("\n"),
+        url: "https://junesight.github.io/leandiet-standard/"
+      },
+      {
+        id: "gooddoctor-protein-quality",
+        category: "유튜브 링크",
+        title: "고품질/저품질 단백질 구별법",
+        content: ["[굿닥터]", "고품질/저품질 단백질 구별법", "https://youtu.be/JoRr5UR6cK0?si=O7-ejw3kcBbBCNPy"].join("\n"),
+        url: "https://youtu.be/JoRr5UR6cK0?si=O7-ejw3kcBbBCNPy"
+      },
+      {
+        id: "gooddoctor-protein-shake-review",
+        category: "유튜브 링크",
+        title: "단백질 쉐이크 주요제품 리뷰",
+        content: ["[굿닥터]", "단백질 쉐이크 주요제품 리뷰", "https://youtu.be/bKC3UA4IiPI?si=MtQ3-lnJQls88ZAP"].join("\n"),
+        url: "https://youtu.be/bKC3UA4IiPI?si=MtQ3-lnJQls88ZAP"
+      },
+      {
+        id: "gooddoctor-protein-bar-review",
+        category: "유튜브 링크",
+        title: "단백질바 주요제품 리뷰",
+        content: ["[굿닥터]", "단백질바 주요제품 리뷰", "https://youtu.be/lZ37kD7vW9k?si=1ekxhqJSm6ibqzbJ"].join("\n"),
+        url: "https://youtu.be/lZ37kD7vW9k?si=1ekxhqJSm6ibqzbJ"
+      },
+      {
+        id: "naver-blog-plateau-checklist",
+        category: "네이버 블로그 링크",
+        title: "'정체기'를 극복 방안 6가지 체크리스트",
+        content: "[부부한의원 블로그]\n'정체기'를 극복 방안 6가지 체크리스트\nhttps://blog.naver.com/booboo1075/224275564612",
+        url: "https://blog.naver.com/booboo1075/224275564612"
+      },
+      {
+        id: "naver-blog-starvation-metabolism",
+        category: "네이버 블로그 링크",
+        title: "굶는 다이어트, 역효과 나는 이유 = 기초대사량",
+        content: "[부부한의원 블로그]\n굶는 다이어트, 역효과 나는 이유 = 기초대사량\nhttps://blog.naver.com/booboo1075/224269319320",
+        url: "https://blog.naver.com/booboo1075/224269319320"
+      },
+      {
+        id: "naver-blog-exercise-weight-loss",
+        category: "네이버 블로그 링크",
+        title: "운동만으로는 살이 잘 빠지지 않는 이유",
+        content: "[부부한의원 블로그]\n운동만으로는 살이 잘 빠지지 않는 이유\nhttps://blog.naver.com/booboo1075/224266484105",
+        url: "https://blog.naver.com/booboo1075/224266484105"
+      },
+      {
+        id: "naver-blog-sleep-shortage",
+        category: "네이버 블로그 링크",
+        title: "살이 잘 빠지지 않는 이유 중 하나, 수면 부족",
+        content: "[부부한의원 블로그]\n살이 잘 빠지지 않는 이유 중 하나, 수면 부족\nhttps://blog.naver.com/booboo1075/224266039459",
+        url: "https://blog.naver.com/booboo1075/224266039459"
+      },
+      {
+        id: "naver-blog-meal-order",
+        category: "네이버 블로그 링크",
+        title: "다이어트에 도움이 되는 식사순서",
+        content: "[부부한의원 블로그]\n다이어트에 도움이 되는 식사순서\nhttps://blog.naver.com/booboo1075/224263053134",
+        url: "https://blog.naver.com/booboo1075/224263053134"
+      },
+      {
+        id: "naver-blog-foods-to-avoid",
+        category: "네이버 블로그 링크",
+        title: "다이어트 중 피해야 할 음식 TOP 10",
+        content: "[부부한의원 블로그]\n다이어트 중 피해야 할 음식 TOP 10\nhttps://blog.naver.com/booboo1075/224258436610",
+        url: "https://blog.naver.com/booboo1075/224258436610"
+      },
+      {
+        id: "naver-blog-leandiet-fat-loss",
+        category: "네이버 블로그 링크",
+        title: "근손실은 최소화, 체지방 위주로 감량하는 린다이어트",
+        content: "[부부한의원 블로그]\n근손실은 최소화, 체지방 위주로 감량하는 린다이어트\nhttps://blog.naver.com/booboo1075/224254817642",
+        url: "https://blog.naver.com/booboo1075/224254817642"
+      },
+      {
+        id: "naver-blog-diet-herbal-medicine-principle",
+        category: "네이버 블로그 링크",
+        title: "다이어트 한약의 원리",
+        content: "[부부한의원 블로그]\n다이어트 한약의 원리\nhttps://blog.naver.com/booboo1075/224249919393",
+        url: "https://blog.naver.com/booboo1075/224249919393"
+      },
+      {
+        id: "naver-blog-diet-herbal-medicine-side-effects",
+        category: "네이버 블로그 링크",
+        title: "다이어트 한약 부작용에 대한 진실",
+        content: "[부부한의원 블로그]\n다이어트 한약 부작용에 대한 진실\nhttps://blog.naver.com/booboo1075/224247436286",
+        url: "https://blog.naver.com/booboo1075/224247436286"
+      },
+      {
+        id: "naver-blog-healthy-weight-loss-speed",
+        category: "네이버 블로그 링크",
+        title: "건강한 다이어트의 감량 속도",
+        content: "[부부한의원 블로그]\n건강한 다이어트의 감량 속도\nhttps://blog.naver.com/booboo1075/224241416943",
+        url: "https://blog.naver.com/booboo1075/224241416943"
+      }
+    ];
+
+    const templateList = document.getElementById("templateList");
+    const searchInput = document.getElementById("searchInput");
+    const categoryFilters = document.getElementById("categoryFilters");
+    const emptyState = document.getElementById("emptyState");
+    const toast = document.getElementById("toast");
+    let activeCategory = "전체";
+
+    function renderCategoryFilters() {
+      const categories = ["전체", ...new Set(templates.map((template) => template.category))];
+
+      categoryFilters.innerHTML = categories
+        .map((category) => {
+          const activeClassName = category === activeCategory ? " active" : "";
+
+          return `<button type="button" class="category-button${activeClassName}" data-category="${escapeHtml(category)}">${escapeHtml(category)}</button>`;
+        })
+        .join("");
+    }
+
+    function renderTemplates(keyword = "") {
+      const normalizedKeyword = keyword.trim().toLowerCase();
+
+      const filteredTemplates = templates.filter((template) => {
+        const searchableText = [
+          template.category,
+          template.title,
+          template.content
+        ].join(" ").toLowerCase();
+
+        const matchesCategory = activeCategory === "전체" || template.category === activeCategory;
+
+        return matchesCategory && searchableText.includes(normalizedKeyword);
+      });
+
+      templateList.innerHTML = "";
+
+      filteredTemplates.forEach((template) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        const tagClassName = template.category === "네이버 블로그 링크"
+          ? "tag naver-blog"
+          : template.category === "유튜브 링크"
+            ? "tag youtube"
+            : "tag";
+        card.innerHTML = `
+          <div class="${tagClassName}">${template.category}</div>
+          <h2 class="card-title">${escapeHtml(template.title).replaceAll("\n", "<br>")}</h2>
+          <pre class="preview">${escapeHtml(template.content)}</pre>
+          <div class="actions">
+            <button type="button" data-copy-id="${template.id}">복사</button>
+            <button type="button" class="secondary" data-open-url="${template.url}">링크 열기</button>
+          </div>
+        `;
+
+        templateList.appendChild(card);
+      });
+
+      emptyState.style.display = filteredTemplates.length ? "none" : "block";
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("복사 완료");
+      } catch (error) {
+        fallbackCopyText(text);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      try {
+        document.execCommand("copy");
+        showToast("복사 완료");
+      } catch (error) {
+        showToast("복사 실패. 텍스트를 직접 선택해 주세요.");
+      }
+
+      document.body.removeChild(textarea);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1600);
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    templateList.addEventListener("click", (event) => {
+      const copyButton = event.target.closest("[data-copy-id]");
+      const openButton = event.target.closest("[data-open-url]");
+
+      if (copyButton) {
+        const template = templates.find((item) => item.id === copyButton.dataset.copyId);
+        if (template) copyText(template.content);
+      }
+
+      if (openButton) {
+        window.open(openButton.dataset.openUrl, "_blank", "noopener,noreferrer");
+      }
+    });
+
+    categoryFilters.addEventListener("click", (event) => {
+      const categoryButton = event.target.closest("[data-category]");
+
+      if (!categoryButton) return;
+
+      activeCategory = categoryButton.dataset.category;
+      renderCategoryFilters();
+      renderTemplates(searchInput.value);
+    });
+
+    searchInput.addEventListener("input", (event) => {
+      renderTemplates(event.target.value);
+    });
+
+    renderCategoryFilters();
+    renderTemplates();
+  </script>
+</body>
+</html></body></html>
